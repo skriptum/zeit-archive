@@ -1,0 +1,8 @@
+.ipynb_checkpoints
+.virtual_documents
+.vscode
+data
+!data/error_log.txt
+!data/progress.txt
+/venv/
+Medien.md
