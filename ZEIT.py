@@ -1,22 +1,3 @@
-# ZEIT Archiverer
-# Skript zurm Herunterladen des gesamten Zeit Archivs von archiv.zeit.de
-# Extrahiert verschiedene Metadaten und den Text der Artikel in JSON-Dateien
-# Autor: marten w (Emp Makro Uni Halle)
-
-# Daten über Artikel:
-# - Titel
-# - Kurzbeschreibing
-# - Keywords
-# - Autor (wenn vorhanden)
-# - Datum (wenn vorhanden)
-# - Text
-# - Kommentare
-#   - UserID und Name
-#   - Kommentartext
-# - URL
-# - ID aus Jahr/Ausgabe/Artikelnummer
-
-
 #%% #Importe
 import requests
 import datetime
@@ -73,7 +54,7 @@ def get_links_from_html(data):
     
     return links
 
-def get_ressorts_from_html(data):
+def get_ausgabe_links(data):
     """
     Extracts the ressorts from the index page
     Args: HTML data from the index page
@@ -278,7 +259,7 @@ def get_issue(g, year, ausgabe):
     """
     try:
         index_data = get_ausgabe_html(year, ausgabe)
-        ressorts = get_ressorts_from_html(index_data)
+        ressorts = get_ausgabe_links(index_data)
         links = [link for ressort in ressorts.values() for link in ressort] #unpack lists 
 
     except:
@@ -355,10 +336,10 @@ if __name__ == "__main__":
 
         # articles = get_issue(g, 1946, 50)
         # json.dump(articles, open("test_2013-51.json", "w+"), ensure_ascii=False, indent=4)
-        for year in range(1958, 2011):
+        for year in range(1958, 2023):
 
             print(f"Year: {year}")
-            articles = get_year_data(g, year)
+            get_year_data(g, year)
 
 
 
