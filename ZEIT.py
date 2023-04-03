@@ -58,12 +58,12 @@ def get_ausgabe_links(data):
     """
     Extracts the ressorts from the index page
     Args: HTML data from the index page
-    Returns: List with Sets (Link, Ressort)
+    Returns: Dict with links as keys and ressort as values
     """
     soup = BeautifulSoup(data, features="lxml") # "Buchstabensuppe" definieren
     ressorts = soup.find_all("h2", class_="cp-area__headline")
     
-    article_links = list()
+    article_links = {}
     for r in ressorts:
         ressort_title = r.text
     
@@ -72,7 +72,7 @@ def get_ausgabe_links(data):
         articles = header_articles + small_articles
 
         for article in articles:
-            article_links.append(article["href"], ressort_title)
+            article_links[article["href"]] = ressort_title
             # create a dictionary with the ressorts as keys and the links as values
         
     return article_links
@@ -259,8 +259,8 @@ def get_issue(g, year, ausgabe):
     """
     try:
         index_data = get_ausgabe_html(year, ausgabe)
-        links = get_ausgabe_links(index_data) 
-
+        links_data = get_ausgabe_links(index_data) 
+        links = links_data.keys()
     except:
         print(f"Error in {year}/{ausgabe}")
         raise Exception
@@ -269,7 +269,6 @@ def get_issue(g, year, ausgabe):
     articles = list()
     for i, link in enumerate(tqdm(links)):
         try:
-            link, ressort = links
             art_data = get_article(g, link)
         except:
             print(f"Error in {link}")
@@ -277,7 +276,7 @@ def get_issue(g, year, ausgabe):
 
         #add id data to the dictionary
         art_data["id"] = f"{year}/{ausgabe}/{i}"
-        art_data["ressort"] = ressort
+        art_data["ressort"] = links_data[link] #look up ressort in original dict
 
         articles.append(art_data)
 
@@ -286,7 +285,7 @@ def get_issue(g, year, ausgabe):
         "year": year,
         "ausgabe": ausgabe,
         "nr_articles": len(articles),
-        "ressorts": list(ressorts.keys()),
+        "ressorts": list(set(links_data.values())), #get unique ressorts
         "accessed": datetime.now().isoformat(),
         "published": datetime.strptime(f"{year} {ausgabe} 4", "%Y %W %w").isoformat()
     }
@@ -336,11 +335,10 @@ if __name__ == "__main__":
 
         # articles = get_issue(g, 1946, 50)
         # json.dump(articles, open("test_2013-51.json", "w+"), ensure_ascii=False, indent=4)
-        for year in range(1958, 2023):
+        for year in range(1947, 2023):
 
             print(f"Year: {year}")
             get_year_data(g, year)
-
 
 
 # %%
