@@ -1,6 +1,6 @@
 #%% #Importe
 import requests
-import datetime
+from datetime import datetime
 import json
 import os
 
@@ -58,13 +58,12 @@ def get_ausgabe_links(data):
     """
     Extracts the ressorts from the index page
     Args: HTML data from the index page
-    Returns: Dictionary with the ressorts and the links to the articles
-        of type {"ressort": [link1, link2, ...]}
+    Returns: List with Sets (Link, Ressort)
     """
     soup = BeautifulSoup(data, features="lxml") # "Buchstabensuppe" definieren
     ressorts = soup.find_all("h2", class_="cp-area__headline")
     
-    article_links = {}
+    article_links = list()
     for r in ressorts:
         ressort_title = r.text
     
@@ -73,7 +72,7 @@ def get_ausgabe_links(data):
         articles = header_articles + small_articles
 
         for article in articles:
-            article_links.setdefault(ressort_title, []).append(article["href"])
+            article_links.append(article["href"], ressort_title)
             # create a dictionary with the ressorts as keys and the links as values
         
     return article_links
@@ -141,7 +140,8 @@ def get_article_metadata(art):
     # example publish date: '2017-05-23T03:56:37+02:00'
     try:
         date = art.opengraph["publish_date"]
-        date = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%S%z") # automatically recognize date format
+        date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S%z") # automatically recognize date format
+        date = date.isoformat() #convert to iso format
     except:
         date=None
     
@@ -150,7 +150,7 @@ def get_article_metadata(art):
         "desc":desc,
         "keywords": keywords,
         "author": author,
-        "date": date.isoformat(),
+        "date": date,
     }
 
 def get_article_text(art, author=None):
@@ -259,18 +259,17 @@ def get_issue(g, year, ausgabe):
     """
     try:
         index_data = get_ausgabe_html(year, ausgabe)
-        ressorts = get_ausgabe_links(index_data)
-        links = [link for ressort in ressorts.values() for link in ressort] #unpack lists 
+        links = get_ausgabe_links(index_data) 
 
     except:
         print(f"Error in {year}/{ausgabe}")
         raise Exception
 
 
-
     articles = list()
     for i, link in enumerate(tqdm(links)):
         try:
+            link, ressort = links
             art_data = get_article(g, link)
         except:
             print(f"Error in {link}")
@@ -278,6 +277,7 @@ def get_issue(g, year, ausgabe):
 
         #add id data to the dictionary
         art_data["id"] = f"{year}/{ausgabe}/{i}"
+        art_data["ressort"] = ressort
 
         articles.append(art_data)
 
