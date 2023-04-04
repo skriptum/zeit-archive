@@ -2,6 +2,9 @@
 
 Skript zurm Herunterladen des gesamten Zeit Archivs von archiv.zeit.de Extrahiert verschiedene Metadaten und den Text der Artikel in JSON-Dateien
 
+**Benötigt Abonnement von Zeit Online!**
+ohne leider nicht nutzbar
+
 ### Daten über Artikel
 
 -   Titel
