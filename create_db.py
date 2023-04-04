@@ -12,7 +12,6 @@ def create_connection(db_file):
     conn = None
     try:
         conn = sqlite3.connect(db_file)
-        return conn
     except Error as e:
         print(e)
 
@@ -36,23 +35,22 @@ if __name__ == '__main__':
     
     sql_create_articles_table = """ 
     CREATE TABLE IF NOT EXISTS articles (
-        id integer PRIMARY KEY,
+        id text PRIMARY KEY,
         year integer NOT NULL,
-        ausgabe integer NOT NULL,
         title text NOT NULL,
         author text,
         keywords text,
         date text,
         ressort text,
         issue_id text,
-        FOREIGN KEY (issue_id) REFERENCES issues (id)
+        FOREIGN KEY (id) REFERENCES issues (issue_id)
         ) """
     
     sql_create_issues_table = """
     CREATE TABLE IF NOT EXISTS issues (
         id text PRIMARY KEY,
         year integer NOT NULL,
-        ausgabe integer NOT NULL,
+        nr_articles integer,
         accessed text NOT NULL,
         published text NOT NULL,
         ressorts text NOT NULL
