@@ -393,11 +393,11 @@ if __name__ == "__main__":
     conn = get_connection()
     with Goose(config) as g:
 
-        get_year_data(g,conn, 1950)
-        # for year in range(1947, 2023):
+        #get_year_data(g,conn, 1950)
+        for year in range(1947, 2023):
 
-        #     print(f"Year: {year}")
-        #     get_year_data(g, year)
+            print(f"Year: {year}")
+            get_year_data(g, year)
 
 
 # %%
