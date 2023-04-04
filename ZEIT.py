@@ -10,6 +10,8 @@ from bs4 import BeautifulSoup
 from goose3 import Goose
 from goose3.configuration import Configuration
 
+import sqlite3
+from sqlite3 import Error
 
 #%%
 def get_ausgabe_html(year, issue):
@@ -168,7 +170,6 @@ def get_article_text(art, author=None):
         text = p.text
 
         # cleanings
-        text = text.strip()
         text = text.replace("\xa0", " ") #replace non-breaking space with normal space
         text = text.replace("\u200b", "") #remove zero-width space
         text = text.replace("\u2009", "") #remove thin space
@@ -293,10 +294,10 @@ def get_issue(g, year, ausgabe):
     
     return metadata, articles
 
-def get_year_data(g, year):
+def get_year_data(g,conn, year):
     """
     Extracts the data from all issues of a year
-    Args: Goose object, year
+    Args: Goose object, SQL connection, year
     Returns: Saves the data as json file for each issue
     """
     #create year folder if it does not exist
@@ -327,18 +328,32 @@ def get_year_data(g, year):
             f.write(f"{year}:{ausgabe}\n")
 
 #%%
+def get_connection(db_file="articles.db"):
+    """
+    Connects to the SQLITE database
+    Returns: Connection object
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+    except Error as e:
+        print(e)
+
+    return conn
+
+#%%
 if __name__ == "__main__":
     config = Configuration()
     config.browser_user_agent = 'googlebot'  # set the browser agent string as google crawler
 
+    conn = get_connection()
     with Goose(config) as g:
 
-        # articles = get_issue(g, 1946, 50)
-        # json.dump(articles, open("test_2013-51.json", "w+"), ensure_ascii=False, indent=4)
-        for year in range(1947, 2023):
+        get_year_data(g,conn, 1960)
+        # for year in range(1947, 2023):
 
-            print(f"Year: {year}")
-            get_year_data(g, year)
+        #     print(f"Year: {year}")
+        #     get_year_data(g, year)
 
 
 # %%
