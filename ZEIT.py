@@ -284,9 +284,8 @@ def get_issue(g, year, ausgabe):
     metadata ={
         "issue_id": f"{year}/{ausgabe}",
         "year": year,
-        "ausgabe": ausgabe,
         "nr_articles": len(articles),
-        "ressorts": list(set(links_data.values())), #get unique ressorts
+        "ressorts": ";".join(set(links_data.values())), #get unique ressorts
         "accessed": datetime.now().isoformat(),
         "published": datetime.strptime(f"{year} {ausgabe} 4", "%Y %W %w").isoformat()
     }
@@ -340,6 +339,44 @@ def get_connection(db_file="articles.db"):
         print(e)
 
     return conn
+
+#%%
+def insert_article(conn, article):
+    """
+    Inserts the article data into the database
+    Args: Connection object, article dictionary
+    """
+    sql = ''' INSERT INTO articles(id,year,title,author,keywords,date,ressort,issue_id)
+              VALUES(?,?,?,?,?,?,?,?) '''
+
+    
+    art = list()
+
+    art.append(article["id"])
+    art.append(int(article["id"].split("/")[0])) #split id and get year
+    art.append(article["title"])
+    art.append(article["author"])
+    art.append(";".join(article["keywords"])) #join keywords to string seperated by ;
+    art.append(str(article["date"]))
+    art.append(article["ressort"])
+    art.append(f"{art[1]}/{article['id'].split('/')[1]}") #get issue id from article id
+
+    cur = conn.cursor()
+   
+    cur.execute(sql, art)
+    conn.commit()
+
+def insert_issue(conn, issue):
+    """
+    Inserts the issue data into the database
+    Args: Connection object, issue dictionary
+    """
+    sql = ''' INSERT INTO issues(id,year,nr_articles,ressorts,accessed,published)
+              VALUES(?,?,?,?,?,?) '''
+
+    cur = conn.cursor()
+    cur.execute(sql, list(issue.values()))
+    conn.commit()
 
 #%%
 if __name__ == "__main__":
