@@ -252,10 +252,10 @@ def get_article_comments(art):
     return comments_data
 
 # %%
-def get_issue(g, year, ausgabe):
+def get_issue(g, conn, year, ausgabe):
     """
     Extracts the data from the index page
-    Args: Goose object, year and issue of the index page
+    Args: Goose object, SQL Connection, year and issue of the index page
     Returns: Metadata about Issue, List of article dictionarys
     """
     try:
@@ -278,6 +278,8 @@ def get_issue(g, year, ausgabe):
         #add id data to the dictionary
         art_data["id"] = f"{year}/{ausgabe}/{i}"
         art_data["ressort"] = links_data[link] #look up ressort in original dict
+
+        insert_article(conn, art_data) #insert into DB
 
         articles.append(art_data)
 
@@ -306,7 +308,8 @@ def get_year_data(g,conn, year):
     for ausgabe in range(1,53):
         try:
             print(f"Downloading {year}/{ausgabe}")
-            metadata, articles = get_issue(g, year, ausgabe)
+            metadata, articles = get_issue(g,conn, year, ausgabe)
+
         except:
             if not ausgabe == 53:
                 print(f"Fetch Error in {year}/{ausgabe}")
@@ -323,6 +326,10 @@ def get_year_data(g,conn, year):
 
             json.dump(comb_data, f, ensure_ascii=False, indent=4)
         
+        # save issue in DB
+        insert_issue(conn, metadata)
+    
+        # save the progress    
         with open("data/progress.txt", "a") as f:
             f.write(f"{year}:{ausgabe}\n")
 
@@ -357,7 +364,7 @@ def insert_article(conn, article):
     art.append(article["title"])
     art.append(article["author"])
     art.append(";".join(article["keywords"])) #join keywords to string seperated by ;
-    art.append(str(article["date"]))
+    art.append(article["date"])
     art.append(article["ressort"])
     art.append(f"{art[1]}/{article['id'].split('/')[1]}") #get issue id from article id
 
@@ -386,7 +393,7 @@ if __name__ == "__main__":
     conn = get_connection()
     with Goose(config) as g:
 
-        get_year_data(g,conn, 1960)
+        get_year_data(g,conn, 1950)
         # for year in range(1947, 2023):
 
         #     print(f"Year: {year}")
