@@ -30,9 +30,11 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
 
-if __name__ == '__main__':
-    conn = create_connection("articles.db")
-    
+def create_articles_table(conn):
+    """
+    create a table from the create_table_sql statement
+    :param conn: Connection object
+    """
     sql_create_articles_table = """ 
     CREATE TABLE IF NOT EXISTS articles (
         id text PRIMARY KEY,
@@ -45,7 +47,13 @@ if __name__ == '__main__':
         issue_id text,
         FOREIGN KEY (id) REFERENCES issues (issue_id)
         ) """
-    
+    create_table(conn, sql_create_articles_table)
+
+def create_issues_table(conn):
+    """
+    create a table from the create_table_sql statement
+    :param conn: Connection object
+    """
     sql_create_issues_table = """
     CREATE TABLE IF NOT EXISTS issues (
         id text PRIMARY KEY,
@@ -55,7 +63,14 @@ if __name__ == '__main__':
         published text NOT NULL,
         ressorts text NOT NULL
         ) """
-    
-    create_table(conn, sql_create_articles_table)
     create_table(conn, sql_create_issues_table)
+
+if __name__ == '__main__':
+    conn = create_connection("articles.db")
+    
+    if conn is not None:
+        create_articles_table(conn)
+        create_issues_table(conn)
+    else:
+        print("Error! cannot create the database connection.")
     print("Database created")
