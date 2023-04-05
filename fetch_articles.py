@@ -35,27 +35,6 @@ def get_ausgabe_html(year, issue):
 
     return data
 
-# not used anymore. replaced by get_ressorts_from_html
-def get_links_from_html(data):
-    """
-    Extracts the links from the index page
-    Args: HTML data from the index page
-    Returns: List of links
-    """
-
-    soup = BeautifulSoup(data, features="lxml") # "Buchstabensuppe" definieren
-
-    header_articles = soup.find_all(class_="teaser-large__heading-link") #große Artikel mit Bild
-    small_articles = soup.find_all(class_="teaser-small__heading-link") #alle Anderen
-
-    articles = header_articles + small_articles
-
-    links = [] #extract individual links
-    for article in articles:
-        links.append(article["href"])
-    
-    return links
-
 def get_ausgabe_links(data):
     """
     Extracts the ressorts from the index page
