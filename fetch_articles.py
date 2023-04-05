@@ -397,7 +397,7 @@ if __name__ == "__main__":
         for year in range(1947, 2023):
 
             print(f"Year: {year}")
-            get_year_data(g, year)
+            get_year_data(g,conn, year)
 
 
 # %%
