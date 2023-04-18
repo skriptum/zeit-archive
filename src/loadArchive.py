@@ -281,8 +281,8 @@ def get_year_data(g,conn, year):
     Returns: Saves the data as json file for each issue
     """
     #create year folder if it does not exist
-    if not os.path.exists(f"data/{year}"):
-        os.makedirs(f"data/{year}")
+    if not os.path.exists(f"../data/{year}"):
+        os.makedirs(f"../data/{year}")
 
     for ausgabe in range(1,53):
         try:
@@ -292,13 +292,13 @@ def get_year_data(g,conn, year):
         except:
             if not ausgabe == 53:
                 print(f"Fetch Error in {year}/{ausgabe}")
-                with open("data/error_log.txt", "a") as f:
+                with open("../data/error_log.txt", "a") as f:
                     f.write(f"{year}:{ausgabe}\n")
             continue
 
         # save the data as json file
         # overwrites existing file!
-        with open(f'data/{year}/{year}_{ausgabe}.json', 'w+', encoding='utf-8') as f:
+        with open(f'../data/{year}/{year}_{ausgabe}.json', 'w+', encoding='utf-8') as f:
             comb_data = dict()
             comb_data["metadata"] = metadata
             comb_data["articles"] = articles
@@ -309,7 +309,7 @@ def get_year_data(g,conn, year):
         insert_issue(conn, metadata)
     
         # save the progress    
-        with open("data/progress.txt", "a") as f:
+        with open("../data/progress.txt", "a") as f:
             f.write(f"{year}:{ausgabe}\n")
 
 #%%

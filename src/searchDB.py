@@ -149,7 +149,7 @@ def plot_article_histogram(conn):
 
 #%%
 if __name__ == '__main__':
-    database = "articles.db"
+    database = "../articles.db"
 
     # create a database connection
     conn = create_connection(database)

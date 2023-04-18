@@ -66,7 +66,7 @@ def create_issues_table(conn):
     create_table(conn, sql_create_issues_table)
 
 if __name__ == '__main__':
-    conn = create_connection("articles.db")
+    conn = create_connection("../articles.db")
     
     if conn is not None:
         create_articles_table(conn)
