@@ -65,12 +65,28 @@ def create_issues_table(conn):
         ) """
     create_table(conn, sql_create_issues_table)
 
+def create_text_table(conn):
+    """
+    create a table from the create_table_sql statement
+    :param conn: Connection object
+    """
+    sql_create_text_table = """
+    CREATE TABLE IF NOT EXISTS text (
+        id text PRIMARY KEY,
+        text text NOT NULL,
+        polarity real,
+        subjectivity real,
+        FOREIGN KEY (id) REFERENCES articles (id)
+        ) """
+    create_table(conn, sql_create_text_table)
+
 if __name__ == '__main__':
     conn = create_connection("../articles.db")
     
     if conn is not None:
         create_articles_table(conn)
         create_issues_table(conn)
+        create_text_table(conn)
     else:
         print("Error! cannot create the database connection.")
     print("Database created")
