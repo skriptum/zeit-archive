@@ -286,6 +286,10 @@ def get_year_data(g,conn, year):
 
     for ausgabe in range(1,53):
         try:
+            # Check if issue is already in DB
+            if not check_issue(conn, year, ausgabe):
+                print(f"Skipping {year}/{ausgabe}")
+                continue
             print(f"Downloading {year}/{ausgabe}")
             metadata, articles = get_issue(g,conn, year, ausgabe)
 
@@ -364,6 +368,22 @@ def insert_issue(conn, issue):
     cur.execute(sql, list(issue.values()))
     conn.commit()
 
+def check_issue(conn, year, ausgabe):
+    """
+    Checks if issue is already in the database
+    Args: Connection object, issue dictionary
+    Returns: True if issue is in DB, False if not
+    """
+    sql = ''' SELECT * FROM issues WHERE id=? '''
+
+    cur = conn.cursor()
+    cur.execute(sql, (f"{year}/{ausgabe}",))
+    res = cur.fetchone()
+
+    if res:
+        return True
+    else:
+        return False
 #%%
 if __name__ == "__main__":
     config = Configuration()
@@ -372,8 +392,9 @@ if __name__ == "__main__":
     conn = get_connection()
     with Goose(config) as g:
 
+        current_year = datetime.now().year
         #get_year_data(g,conn, 1950)
-        for year in range(1947, 2023):
+        for year in range(1947, current_year+1):
 
             print(f"Year: {year}")
             get_year_data(g,conn, year)
