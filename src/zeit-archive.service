@@ -1,0 +1,10 @@
+[Unit]
+Description=python zeit-archive script service
+After=network.target
+[Service]
+Type=idle
+Restart=on-failure
+WorkingDirectory=/home/aazsn/zeit-archive
+ExecStart=/home/aazsn/zeit-archive/venv/bin/python3 /home/aazsn/zeit-archive/fetch_articles.py
+[Install]
+WantedBy=multi-user.target

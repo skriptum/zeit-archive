@@ -147,29 +147,6 @@ def plot_article_histogram(conn):
 
     return fig
 
-#%%
-if __name__ == '__main__':
-    database = "../articles.db"
-
-    # create a database connection
-    conn = create_connection(database)
-    
-    #%%
-    #Histogram of articles per year of a given keyword
-    plot_keyword_histogram(conn, ["Adenauer", "Brandt", "Kohl"]).show()
-
-    #%%
-    #Histogram of articles per year of a given author
-    plot_author_histogram(conn, "Thomas_Hanke").show()
-
-    #%%
-    #Plot 10 most used keywords of author
-    plot_author_keywords(conn, "Thomas_Hanke").show()
-
-    #%%
-    #Histogram of articles per year
-    plot_article_histogram(conn).show()
-
 
 # %%
 

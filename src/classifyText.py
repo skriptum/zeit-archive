@@ -9,6 +9,7 @@ import os
 
 import spacy
 from spacytextblob.spacytextblob import SpacyTextBlob
+import pandas as pd
 
 #%%
 def create_connection(db_file):
@@ -62,10 +63,11 @@ if __name__ == '__main__':
     conn = create_connection("../articles.db")
     path = "../data/"
 
+    IDs = pd.read_csv("../data/IDs.csv") #already finished articles
     #%%
     # walk through all files in the data folder
     for dirpath, dirnames, filenames in os.walk(path):
-        print("walking through files")
+        print(f"walking through files {dirpath}")
 
         for filename in [f for f in filenames if f.endswith(".json")]:
             filepath = os.path.join(dirpath, filename)
@@ -76,6 +78,9 @@ if __name__ == '__main__':
 
                 # get the articles
                 for article in data["articles"]:
+                    # check if the article is already in the database
+                    if article["id"] in IDs["id"].values:
+                        continue
                     # classify the article
                     polarity, subjectivity = classify_article(nlp, article["article_text"])
 
