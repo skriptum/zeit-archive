@@ -13,8 +13,14 @@ from goose3.configuration import Configuration
 import sqlite3
 from sqlite3 import Error
 
+from loadSelenium import *
+# get_article_html()
+# get_ausgabe_html()
+# start_selenium()
+
+
 #%%
-def get_ausgabe_html(year, issue):
+def get_ausgabe(driver, year, issue):
     """
     Extracts the HTML from the index page
     Args: year and issue of the index page
@@ -30,10 +36,10 @@ def get_ausgabe_html(year, issue):
 
     if page.status_code == 404:
         raise Exception
-    else:
-        data = page.text # das gesamte HTML
+    
+    html = get_article_html(driver, index_url)
 
-    return data
+    return html
 
 def get_ausgabe_links(data):
     """
@@ -59,7 +65,7 @@ def get_ausgabe_links(data):
     return article_links
         
 #%%
-def get_article(g, url):
+def get_article(g, url, driver):
     """
     Extracts the metadata and the text from the article
     Args: Goose object, url of the article
@@ -67,7 +73,7 @@ def get_article(g, url):
         with the keys: "desc", "keywords", "title", "author", "date", "article_text", "url"
     """
     
-    art = get_article_data(g, url)
+    art = get_article_data(g, url, driver)
     metadata = get_article_metadata(art)
     article_data = get_article_text(art, metadata["author"])
 
@@ -85,17 +91,20 @@ def get_article(g, url):
 
     return data
 
-def get_article_data(g, url):
+def get_article_data(g, url, driver):
     """
     Extracts the article data from the url
     Args: Goose object, url of the article
     Returns: Article object from Goose
     """
-    try:
-        new_url = f"{url}/komplettansicht" #für alle Seiten eines Artikels
-        art = g.extract(new_url)
-    except:
-        art = g.extract(url)
+
+    if requests.get(f"{url}/komplettansicht").status_code == 404:
+        url = url 
+    else:
+        url = f"{url}/komplettansicht"
+
+    html = get_article_html(driver, url)
+    art = g.extract(raw_html=html)
     return art
 
 def get_article_metadata(art):
@@ -231,14 +240,14 @@ def get_article_comments(art):
     return comments_data
 
 # %%
-def get_issue(g, conn, year, ausgabe):
+def get_issue(g, conn, year, ausgabe, driver):
     """
     Extracts the data from the index page
     Args: Goose object, SQL Connection, year and issue of the index page
     Returns: Metadata about Issue, List of article dictionarys
     """
     try:
-        index_data = get_ausgabe_html(year, ausgabe)
+        index_data = get_ausgabe(driver, year, issue=ausgabe) #TODO
         links_data = get_ausgabe_links(index_data) 
         links = links_data.keys()
     except:
@@ -249,7 +258,7 @@ def get_issue(g, conn, year, ausgabe):
     articles = list()
     for i, link in enumerate(tqdm(links)):
         try:
-            art_data = get_article(g, link)
+            art_data = get_article(g, link, driver)
         except:
             print(f"Error in {link}")
             continue
@@ -274,7 +283,7 @@ def get_issue(g, conn, year, ausgabe):
     
     return metadata, articles
 
-def get_year_data(g,conn, year):
+def get_year_data(g,conn, year, driver):
     """
     Extracts the data from all issues of a year
     Args: Goose object, SQL connection, year
@@ -287,11 +296,11 @@ def get_year_data(g,conn, year):
     for ausgabe in range(1,53):
         try:
             # Check if issue is already in DB
-            if not check_issue(conn, year, ausgabe):
+            if check_issue(conn, year, ausgabe):
                 print(f"Skipping {year}/{ausgabe}")
                 continue
             print(f"Downloading {year}/{ausgabe}")
-            metadata, articles = get_issue(g,conn, year, ausgabe)
+            metadata, articles = get_issue(g,conn, year, ausgabe, driver)
 
         except:
             if not ausgabe == 53:
@@ -390,14 +399,19 @@ if __name__ == "__main__":
     config.browser_user_agent = 'googlebot'  # set the browser agent string as google crawler
 
     conn = get_connection()
+
+    username = "REDACTED"
+    password = "REDACTED"
+    driver = start_selenium(username, password)
+
     with Goose(config) as g:
 
         current_year = datetime.now().year
         #get_year_data(g,conn, 1950)
-        for year in range(1947, current_year+1):
+        for year in range(2023,2024):
 
             print(f"Year: {year}")
-            get_year_data(g,conn, year)
+            get_year_data(g,conn, year, driver)
 
-
+    driver.close()
 # %%
